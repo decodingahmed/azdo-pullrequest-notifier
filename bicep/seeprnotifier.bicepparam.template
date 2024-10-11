@@ -1,9 +1,0 @@
-using 'module/main.bicep'
-
-param project_prefix = '<SET_ME>'
-param project_url = '<SET_ME>'
-param teams_channel_webhook_url = '<SET_ME>'
-param email_addresses = [
-  '<SET_ME>'
-]
-param azdo_access_token = '<SET_ME>'

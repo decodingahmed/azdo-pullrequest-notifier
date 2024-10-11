@@ -1,0 +1,12 @@
+using 'module/main.bicep'
+
+param resource_prefix = '<SET_ME>'
+param azdo_project_url = '<SET_ME>'
+param azdo_access_token = '<SET_ME>'
+param azdo_repository_names = [
+  '<SET_ME>'
+]
+param teams_channel_webhook_url = '<SET_ME>'
+param email_addresses = [
+  '<SET_ME>'
+]
