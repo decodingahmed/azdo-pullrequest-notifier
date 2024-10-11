@@ -5,6 +5,7 @@ param resource_prefix string
 param region string = 'uksouth'
 
 @description('The email addresses to send the PR Notification to.')
+@minLength(1)
 param email_addresses array
 
 @description('The prefix of the email subject.')
