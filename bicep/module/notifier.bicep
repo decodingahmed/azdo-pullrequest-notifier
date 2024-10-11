@@ -8,7 +8,7 @@ param region string = 'uksouth'
 param email_addresses array
 
 @description('The prefix of the email subject.')
-param email_subject_prefix string = 'PR Bulletin'
+param email_subject_prefix string = 'Pull Requests'
 
 @description('The URL of the Azure DevOps project.')
 param azdo_project_url string
@@ -22,6 +22,9 @@ param azdo_repository_names array = []
 
 @description('The URL of the Teams Channel Webhook to post the PR Notification to.')
 param teams_channel_webhook_url string
+
+// Current way of creating arrays with distinct elements. See https://github.com/Azure/bicep/issues/2082#issuecomment-1291082831
+var distinct_email_addresses = union(email_addresses, email_addresses)
 
 //
 // Communications Services
@@ -284,7 +287,7 @@ resource logic_app 'Microsoft.Logic/workflows@2019-05-01' = {
         Filter_out_Draft_and_WIP_PRs: {
           inputs: {
             from: '@body(\'Map_PR_Entries\')'
-            where: '@equals(and(not(item().isWatchedRepository), or(item().isDraft, item().isWorkInProgress)), false)'
+            where: '@and(item().isWatchedRepository, not(or(item().isDraft, item().isWorkInProgress)))'
           }
           runAfter: {
             Map_PR_Entries: [
@@ -349,7 +352,7 @@ resource logic_app 'Microsoft.Logic/workflows@2019-05-01' = {
               {
                 name: 'email_recipients'
                 type: 'array'
-                value: [for email in email_addresses: { email: email }]
+                value: [for email in distinct_email_addresses: { email: email }]
               }
             ]
           }
@@ -400,7 +403,7 @@ resource logic_app 'Microsoft.Logic/workflows@2019-05-01' = {
               projectName: '@{item()?[\'repository\']?[\'project\']?[\'name\']}'
               pullRequestId: '@item()?[\'pullRequestId\']'
               repositoryName: '@{item()?[\'repository\']?[\'name\']}'
-              isWatchedRepository: '@{if(empty(variables(\'azdo_repository_names\')), true, contains(variables(\'azdo_repository_names\'), item().repository.name))}'
+              isWatchedRepository: '@{or(empty(variables(\'azdo_repository_names\')), contains(variables(\'azdo_repository_names\'), item().repository.name))}'
               title: '@item()?[\'title\']'
               url: '@{variables(\'azdo_project_url\')}_git/@{item()?[\'repository\']?[\'name\']}/pullrequest/@{item()?[\'pullRequestId\']}'
             }
@@ -652,7 +655,7 @@ resource logic_app 'Microsoft.Logic/workflows@2019-05-01' = {
         }
       }
       triggers: {
-        'Every_weekday_9am,_11am,_2pm_and_4pm': {
+        Scheduled_recurrence: {
           evaluatedRecurrence: {
             frequency: 'Week'
             interval: 1
