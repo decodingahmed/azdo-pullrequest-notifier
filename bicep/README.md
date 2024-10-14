@@ -37,8 +37,8 @@ Draft PRs and PRs with "WIP" prefixed to the title are filtered out from the bul
 
 3. Deploy the PR Notifier with the following command:
    ```bash
-   az deployment sub create `
-     --name pr-notifier-deployment `
-     --location uksouth `
+   az deployment sub create \
+     --name pr-notifier-deployment \
+     --location uksouth \
      --parameters file/from/previous/step.bicepparam
    ```
